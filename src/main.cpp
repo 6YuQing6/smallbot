@@ -136,6 +136,7 @@ PORT3,     -PORT4,
 }
 
 void ColorSortBottomParallel() {
+  ColorSensor.brightness();
   while (true) {
   if (OpticalBottom.isNearObject()) {
         Brain.Screen.clearScreen();
