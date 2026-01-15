@@ -25,6 +25,7 @@
 #include "JAR-Template/PID.h"
 #include "autons.h"
 #include "color.h"
+#include "counter.h"
 
 #define waitUntil(condition)                                                   \
   do {                                                                         \

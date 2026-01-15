@@ -309,6 +309,79 @@ void auto_Interaction(void) {
 /*  a VEX Competition.                                                       */
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
+BallCounter counter;
+
+// called when bottom optical *detects* a new object
+void onBottomDetected() {
+  // attempt to add a ball
+  if (counter.countBall()) {
+    Brain.Screen.printAt(10, 50, "Ball added! Count: %d", counter.balls());
+  } else {
+    Brain.Screen.printAt(10, 50, "Count full (%d)", counter.balls());
+  }
+  Brain.Screen.print("Bottom detected");
+
+  int hue = OpticalBottom.hue();
+  bool shouldSort = false;
+
+  if (TEAMCOLOR == BallBlue) {
+    // RED: 350–359 and 0–10
+    if ((hue >= 350 && hue <= 359) ||
+        (hue >= 0   && hue <= 10)) {
+      shouldSort = true;
+    }
+  }
+  else if (TEAMCOLOR == BallRed) {
+    // BLUE: 210–240
+    if (hue >= 210 && hue <= 240) {
+      shouldSort = true;
+    }
+  }
+
+  if (shouldSort) {
+    ColorSort.set(true);
+    wait(150, msec);
+  }
+  ColorSort.set(false);
+}
+
+// called when top optical *detects* a new object being sorted out
+void onTopDetected() {
+    // Brain.Screen.print("Top detected");
+
+  int hue = OpticalTop.hue();
+  bool shouldSort = false;
+
+  if (TEAMCOLOR == BallBlue) {
+    // RED: 350–359 and 0–10
+    if ((hue >= 350 && hue <= 359) ||
+        (hue >= 0   && hue <= 30)) {
+      shouldSort = true;
+    }
+  }
+  else if (TEAMCOLOR == BallRed) {
+    // BLUE: 210–240
+    if (hue >= 210 && hue <= 240) {
+      shouldSort = true;
+    }
+  }
+
+  if (shouldSort) {
+    // SecondStage.spin(forward, 12000,voltageUnits::mV);
+    // ThirdStage.spin(reverse,12000,voltageUnits::mV);
+    SecondStage.spinToPosition(2, rev, true);
+    ThirdStage.spinToPosition(-2, rev, true);
+      // attempt to remove a ball
+    if (counter.removeBall()) {
+      Brain.Screen.printAt(10, 70, "Ball removed! Count: %d", counter.balls());
+    }
+  } else { // if theres ball of same color stop the intake and hold top ball
+    ThirdStage.stop(hold);
+    SecondStage.stop(hold);
+  }
+  
+}
+
 
 bool firstAutoFlag = true;
 
@@ -319,16 +392,18 @@ void autonomousMain(void) {
   // When the field goes enabled for the second time this task will start again
   // and we will enter the interaction period. 
   // ..........................................................................
-
+  OpticalBottom.objectDetected(onBottomDetected);
+  OpticalTop.objectDetected(onTopDetected);
   // FirstStage.spin(forward, 100, percent);
   // SecondStage.spin(forward,100,percent);
   // ThirdStage.spin(forward, 100, percent);
-  thread colorSort = thread(ColorSortBottomParallel);
-  thread colorSortTop = thread(ColorSortTopParallel);
+  // thread colorSort = thread(ColorSortBottomParallel);
+  // thread colorSortTop = thread(ColorSortTopParallel);
+
   // might cause race condition
   // thread intakeSpin = thread(IntakeParallel);
     FirstStage.spin(fwd,12000,voltageUnits::mV);
-    SecondStage.spin(fwd,12000,voltageUnits::mV);
+    // SecondStage.spin(fwd,12000,voltageUnits::mV);
   // if(firstAutoFlag)
   //   auto_Isolation();
   // else 

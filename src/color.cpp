@@ -5,6 +5,7 @@ using signature = vision::signature;
 using code = vision::code;
 
 
+
 void ColorSortBottomParallel() {
   while (true) {
   if (OpticalBottom.isNearObject()) {
@@ -62,9 +63,14 @@ void ColorSortTopParallel() {
       }
 
       if (shouldSort) {
+        SecondStage.spin(forward, 12000,voltageUnits::mV);
         ThirdStage.spin(reverse,12000,voltageUnits::mV);
         wait(500, msec);
+      } else { // if theres ball of same color stop the intake and hold top ball
+        ThirdStage.stop(hold);
+        SecondStage.stop(hold);
       }
+      // if scoring need to spin later
       wait(50, msec);
    }
   }
