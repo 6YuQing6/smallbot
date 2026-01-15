@@ -1,5 +1,11 @@
 using namespace vex;
 
+enum OBJECT {
+  BallBlue,
+  BallRed
+};
+#define TEAMCOLOR BallBlue
+
 extern brain Brain;
 
 //Motors

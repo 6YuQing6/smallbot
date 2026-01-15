@@ -1,4 +1,5 @@
 
 using namespace vex;
 
-extern optical ColorSensor;
+extern void ColorSortBottomParallel();
+extern void ColorSortTopParallel();
