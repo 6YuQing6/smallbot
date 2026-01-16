@@ -309,18 +309,13 @@ void auto_Interaction(void) {
 /*  a VEX Competition.                                                       */
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-BallCounter counter;
+BallCounter counter(6);
+vex::timer ColorSortTimer;
 
 // called when bottom optical *detects* a new object
 void onBottomDetected() {
   // attempt to add a ball
-  if (counter.countBall()) {
-    Brain.Screen.printAt(10, 50, "Ball added! Count: %d", counter.balls());
-  } else {
-    Brain.Screen.printAt(10, 50, "Count full (%d)", counter.balls());
-  }
   Brain.Screen.print("Bottom detected");
-
   int hue = OpticalBottom.hue();
   bool shouldSort = false;
 
@@ -341,6 +336,16 @@ void onBottomDetected() {
   if (shouldSort) {
     ColorSort.set(true);
     wait(150, msec);
+    if (counter.removeBall()) {
+      Brain.Screen.printAt(10, 50, "Ball removed! Count: %d", counter.balls());
+    } else {
+      Brain.Screen.printAt(10, 50, "Count full (%d)", counter.balls());
+    }
+  }
+  if (counter.countBall()) {
+    Brain.Screen.printAt(10, 50, "Ball added! Count: %d", counter.balls());
+  } else {
+    Brain.Screen.printAt(10, 50, "Count full (%d)", counter.balls());
   }
   ColorSort.set(false);
 }
@@ -350,34 +355,45 @@ void onTopDetected() {
     // Brain.Screen.print("Top detected");
 
   int hue = OpticalTop.hue();
-  bool shouldSort = false;
+  // bool shouldSort = false;
+  int detected = BallUndefined;
 
-  if (TEAMCOLOR == BallBlue) {
-    // RED: 350–359 and 0–10
-    if ((hue >= 350 && hue <= 359) ||
-        (hue >= 0   && hue <= 30)) {
-      shouldSort = true;
-    }
+  if ((hue >= 350 && hue <= 359) ||
+      (hue >= 0   && hue <= 30)) {
+    // shouldSort = true;
+    detected = BallRed;
   }
-  else if (TEAMCOLOR == BallRed) {
-    // BLUE: 210–240
-    if (hue >= 210 && hue <= 240) {
-      shouldSort = true;
-    }
+  // BLUE: 210–240
+  if (hue >= 210 && hue <= 240) {
+    detected = BallBlue;
   }
+  
 
-  if (shouldSort) {
+  if (TEAMCOLOR != detected) {
     // SecondStage.spin(forward, 12000,voltageUnits::mV);
     // ThirdStage.spin(reverse,12000,voltageUnits::mV);
-    SecondStage.spinToPosition(2, rev, true);
-    ThirdStage.spinToPosition(-2, rev, true);
+    //SecondStage.setVelocity(100, percent);
+    //ThirdStage.setVelocity(100, percent);
+    //SecondStage.spinFor(vex::directionType::fwd, 10, vex::rotationUnits::rev, false);
+    //ThirdStage.spinFor(vex::directionType::rev, 10, vex::rotationUnits::rev, true);
+    ColorSortTimer.event([](){
+        // stop intake after 1 second if still detecting object
+        ThirdStage.spin(reverse,12000,voltageUnits::mV);
+        wait(1000, msec);
+    }, 200);
       // attempt to remove a ball
     if (counter.removeBall()) {
       Brain.Screen.printAt(10, 70, "Ball removed! Count: %d", counter.balls());
     }
   } else { // if theres ball of same color stop the intake and hold top ball
     ThirdStage.stop(hold);
-    SecondStage.stop(hold);
+    ColorSortTimer.event([](){
+      if (OpticalTop.isNearObject()) {
+        // stop intake after 1 second if still detecting object
+        SecondStage.stop(hold);
+      } 
+    }, 1000);
+    // SecondStage.stop(hold);
   }
   
 }
@@ -402,7 +418,8 @@ void autonomousMain(void) {
 
   // might cause race condition
   // thread intakeSpin = thread(IntakeParallel);
-    FirstStage.spin(fwd,12000,voltageUnits::mV);
+  FirstStage.spin(fwd,12000,voltageUnits::mV);
+  SecondStage.spin(fwd, 12000, voltageUnits::mV);
     // SecondStage.spin(fwd,12000,voltageUnits::mV);
   // if(firstAutoFlag)
   //   auto_Isolation();

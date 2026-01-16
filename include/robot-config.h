@@ -2,7 +2,8 @@ using namespace vex;
 
 enum OBJECT {
   BallBlue,
-  BallRed
+  BallRed,
+  BallUndefined
 };
 #define TEAMCOLOR BallBlue
 
