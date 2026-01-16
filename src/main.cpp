@@ -122,7 +122,9 @@ PORT3,     -PORT4,
   OpticalTop.setLightPower(100, percent);
   OpticalBottom.setLight(ledState::on);
   OpticalTop.setLight(ledState::on);
-
+  SecondStage.setVelocity(100, percent);
+  ThirdStage.setVelocity(100, percent);
+  FirstStage.setVelocity(100, percent);
   vexcodeInit();
   default_constants();
 }
@@ -317,36 +319,30 @@ void onBottomDetected() {
   // attempt to add a ball
   Brain.Screen.print("Bottom detected");
   int hue = OpticalBottom.hue();
-  bool shouldSort = false;
+  int detected = BallUndefined;
 
-  if (TEAMCOLOR == BallBlue) {
     // RED: 350–359 and 0–10
-    if ((hue >= 350 && hue <= 359) ||
-        (hue >= 0   && hue <= 10)) {
-      shouldSort = true;
-    }
-  }
-  else if (TEAMCOLOR == BallRed) {
-    // BLUE: 210–240
-    if (hue >= 210 && hue <= 240) {
-      shouldSort = true;
-    }
+  if ((hue >= 300 && hue <= 359) ||
+      (hue >= 0   && hue <= 50)) {
+    detected = BallRed;
   }
 
-  if (shouldSort) {
+  // BLUE: 210–240
+  if (hue >= 60 && hue <= 240) {
+    detected = BallBlue;
+  }
+
+  if (TEAMCOLOR != detected) {
     ColorSort.set(true);
     wait(150, msec);
-    if (counter.removeBall()) {
-      Brain.Screen.printAt(10, 50, "Ball removed! Count: %d", counter.balls());
+  } else {
+    if (counter.countBall()) {
+      Brain.Screen.printAt(10, 50, "Ball added! Count: %d", counter.balls());
     } else {
       Brain.Screen.printAt(10, 50, "Count full (%d)", counter.balls());
     }
   }
-  if (counter.countBall()) {
-    Brain.Screen.printAt(10, 50, "Ball added! Count: %d", counter.balls());
-  } else {
-    Brain.Screen.printAt(10, 50, "Count full (%d)", counter.balls());
-  }
+
   ColorSort.set(false);
 }
 
@@ -358,16 +354,17 @@ void onTopDetected() {
   // bool shouldSort = false;
   int detected = BallUndefined;
 
-  if ((hue >= 350 && hue <= 359) ||
-      (hue >= 0   && hue <= 30)) {
+  if ((hue >= 300 && hue <= 359) ||
+      (hue >= 0   && hue <= 50)) {
     // shouldSort = true;
     detected = BallRed;
   }
   // BLUE: 210–240
-  if (hue >= 210 && hue <= 240) {
+  if (hue >= 60 && hue <= 260) {
     detected = BallBlue;
   }
   
+  Brain.Screen.printAt(10, 90, "Detected hue: %d Color: %d", hue, detected);
 
   if (TEAMCOLOR != detected) {
     // SecondStage.spin(forward, 12000,voltageUnits::mV);
@@ -379,7 +376,8 @@ void onTopDetected() {
     ColorSortTimer.event([](){
         // stop intake after 1 second if still detecting object
         ThirdStage.spin(reverse,12000,voltageUnits::mV);
-        wait(1000, msec);
+        wait(500, msec);
+        ThirdStage.stop(hold);
     }, 200);
       // attempt to remove a ball
     if (counter.removeBall()) {
@@ -390,12 +388,13 @@ void onTopDetected() {
     ColorSortTimer.event([](){
       if (OpticalTop.isNearObject()) {
         // stop intake after 1 second if still detecting object
-        SecondStage.stop(hold);
+        ThirdStage.spinFor(forward, 1, rev, false);
+        SecondStage.spinFor(reverse, 1, rev, false);
+        // SecondStage.stop(hold);
       } 
-    }, 1000);
+    }, 500);
     // SecondStage.stop(hold);
   }
-  
 }
 
 
