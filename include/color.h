@@ -1,5 +1,5 @@
 
 using namespace vex;
 
-extern void ColorSortBottomParallel();
-extern void ColorSortTopParallel();
+extern void onBottomDetected();
+extern void onTopDetected();

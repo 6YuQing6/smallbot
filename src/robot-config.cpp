@@ -32,6 +32,9 @@ digital_out Expansion = digital_out(Brain.ThreeWirePort.B);
 optical OpticalTop = optical(PORT4);
 optical OpticalBottom = optical(PORT1);
 
+// AI 
+gps GPSLeft = gps(PORT9, 0, -165, distanceUnits::mm, 180);
+gps GPSRight = gps(PORT12, 0, 165, distanceUnits::mm, 180);
 
 
 

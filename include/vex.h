@@ -26,6 +26,9 @@
 #include "autons.h"
 #include "color.h"
 #include "counter.h"
+#include "ai_jetson.h"
+#include "ai_robot_link.h"
+
 
 #define waitUntil(condition)                                                   \
   do {                                                                         \

@@ -5,6 +5,7 @@ enum OBJECT {
   BallRed,
   BallUndefined
 };
+
 #define TEAMCOLOR BallBlue
 
 extern brain Brain;
@@ -32,7 +33,9 @@ extern digital_out Mathcloader;
 extern digital_out ColorSort;
 extern digital_out Expansion;
 
-
+// AI
+extern gps GPSLeft;
+extern gps GPSRight;
 
 
 
