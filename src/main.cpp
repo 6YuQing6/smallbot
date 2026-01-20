@@ -114,6 +114,8 @@ PORT3,     -PORT4,
   SecondStage.setVelocity(100, percent);
   ThirdStage.setVelocity(100, percent);
   FirstStage.setVelocity(100, percent);
+  Expansion.set(true);
+  Matchloader.set(false);
   vexcodeInit();
   default_constants();
 }

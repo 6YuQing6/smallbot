@@ -24,9 +24,9 @@ motor SecondStage = motor(PORT11, ratio6_1, false); // forward outake / up
 motor ThirdStage = motor(PORT12, ratio6_1, false); // forward outake / up
 
 //Pneumatics
-digital_out Matchloader = digital_out(Brain.ThreeWirePort.A);
-digital_out ColorSort = digital_out(Brain.ThreeWirePort.C);
-digital_out Expansion = digital_out(Brain.ThreeWirePort.B);
+digital_out Matchloader = digital_out(Brain.ThreeWirePort.B);
+digital_out ColorSort = digital_out(Brain.ThreeWirePort.A);
+digital_out Expansion = digital_out(Brain.ThreeWirePort.C);
 
 //Sensors
 optical OpticalTop = optical(PORT4);
