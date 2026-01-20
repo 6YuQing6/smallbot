@@ -29,7 +29,7 @@ extern optical OpticalTop;
 extern optical OpticalBottom;
 
 //Pistons
-extern digital_out Mathcloader;
+extern digital_out Matchloader;
 extern digital_out ColorSort;
 extern digital_out Expansion;
 

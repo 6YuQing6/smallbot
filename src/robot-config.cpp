@@ -10,13 +10,13 @@ brain  Brain;
 
 //Motors for the drivetrain
 
-motor Right1 = motor(PORT20, ratio6_1, true);
-motor Right2 = motor(PORT19, ratio6_1, true);
-motor Right3 = motor(PORT18, ratio6_1, true);
+motor Right1 = motor(PORT20, ratio6_1, false);
+motor Right2 = motor(PORT19, ratio6_1, false);
+motor Right3 = motor(PORT18, ratio6_1, false);
 
-motor Left1 = motor(PORT16, ratio6_1, false);
-motor Left2 = motor(PORT15, ratio6_1, false);
-motor Left3 = motor(PORT14, ratio6_1, false);
+motor Left1 = motor(PORT16, ratio6_1, true);
+motor Left2 = motor(PORT15, ratio6_1, true);
+motor Left3 = motor(PORT14, ratio6_1, true);
 
 //The motor constructor takes motors as (port, ratio, reversed), so for example
 motor FirstStage = motor(PORT8, ratio6_1, false); // forward intake
@@ -24,7 +24,7 @@ motor SecondStage = motor(PORT11, ratio6_1, false); // forward outake / up
 motor ThirdStage = motor(PORT12, ratio6_1, false); // forward outake / up
 
 //Pneumatics
-digital_out Mathcloader = digital_out(Brain.ThreeWirePort.A);
+digital_out Matchloader = digital_out(Brain.ThreeWirePort.A);
 digital_out ColorSort = digital_out(Brain.ThreeWirePort.C);
 digital_out Expansion = digital_out(Brain.ThreeWirePort.B);
 

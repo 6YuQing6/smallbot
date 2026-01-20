@@ -121,9 +121,6 @@ PORT3,     -PORT4,
 
 void auto_Isolation(void) {
 
-  chassis.drive_with_voltage(0,0);
-  FirstStage.spin(fwd,12000,voltageUnits::mV);
-
 }
 
 
@@ -146,7 +143,7 @@ void auto_Interaction(void) {
   OpticalBottom.setLightPower(100, percent);
   OpticalTop.setLightPower(100, percent);
   Expansion.set(true);
-  Mathcloader.set(false);
+  Matchloader.set(false);
 
 
   chassis.drive_max_voltage = 8;
