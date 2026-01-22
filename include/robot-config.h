@@ -10,6 +10,9 @@ enum OBJECT {
 
 extern brain Brain;
 
+//Controller
+extern controller Controller1;
+
 //Motors
 extern motor FirstStage;
 extern motor SecondStage;
@@ -33,10 +36,11 @@ extern digital_out Matchloader;
 extern digital_out ColorSort;
 extern digital_out Expansion;
 
-// AI
-extern gps GPSLeft;
-extern gps GPSRight;
+// // AI
+// extern gps GPSLeft;
+// extern gps GPSRight;
 
+extern inertial InertialSensor;
 
 
 //Drivetrain Motors

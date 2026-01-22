@@ -14,3 +14,7 @@ void full_test();
 void odom_test();
 void tank_odom_test();
 void holonomic_odom_test();
+
+void pid_tune_task();
+void pid_drive_test();
+void pid_turn_test();

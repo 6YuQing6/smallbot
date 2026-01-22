@@ -21,7 +21,7 @@ void onBottomDetected() {
   }
 
   // BLUE: 210–240
-  if (hue >= 60 && hue <= 240) {
+  if (hue >= 160 && hue <= 240) {
     detected = BallBlue;
   }
 

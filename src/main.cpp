@@ -25,7 +25,7 @@ competition Competition;
 /*  already have configured your motors.                                     */
 /*---------------------------------------------------------------------------*/
 
-ai::jetson  jetson_comms;
+// ai::jetson  jetson_comms;
 
 Drive chassis(
 //Write it here:
@@ -35,14 +35,14 @@ ZERO_TRACKER_NO_ODOM,
 //You will input whatever motor names you chose when you configured your robot using the sidebar configurer, they don't have to be "Motor1" and "Motor2".
 
 //Left Motors:
-motor_group(Right1,Right2,Right3),
+motor_group(Left1,Left2,Left3),
 
 //Right Motors:
-motor_group(Left1,Left2,Left3),
+motor_group(Right1,Right2,Right3),
 
 
 //Specify the PORT NUMBER of your inertial sensor, in PORT format (i.e. "PORT1", not simply "1"):
-PORT7,
+PORT17,
 
 //Input your wheel diameter. (4" omnis are actually closer to 4.125"):
 3.25,
@@ -54,7 +54,7 @@ PORT7,
 
 //Gyro scale, this is what your gyro reads when you spin the robot 360 degrees.
 //For most cases 360 will do fine here, but this scale factor can be very helpful when precision is necessary.
-360,
+356.4,
 
 /*---------------------------------------------------------------------------*/
 /*                                  PAUSE!                                   */
@@ -116,13 +116,28 @@ PORT3,     -PORT4,
   FirstStage.setVelocity(100, percent);
   Expansion.set(true);
   Matchloader.set(false);
-  vexcodeInit();
+  // while (InertialSensor.isCalibrating()) {
+  InertialSensor.calibrate();
+    // Brain.Screen.printAt(10, 10, "Calibrating");
+  // }
+  Brain.Screen.printAt(10,10, "Done Calibrating");
+  // vexcodeInit();
   default_constants();
 }
 
 
 void auto_Isolation(void) {
-
+  chassis.set_heading(0);
+  chassis.drive_distance(-34.5);
+  chassis.turn_to_angle(45);
+  chassis.drive_distance(-5);
+  ThirdStage.spin(reverse, 50, percent);
+  SecondStage.spin(forward, 50, percent);
+  wait(1000, msec);
+  chassis.drive_distance(6);
+  wait(500, msec);
+  chassis.turn_to_angle(-45);
+  // chassis.drive_distance(10);
 }
 
 
@@ -185,23 +200,23 @@ void autonomousMain(void) {
   // ..........................................................................
   OpticalBottom.objectDetected(onBottomDetected);
   OpticalTop.objectDetected(onTopDetected);
-  // FirstStage.spin(forward, 100, percent);
-  // SecondStage.spin(forward,100,percent);
+  FirstStage.spin(forward, 100, percent);
+  SecondStage.spin(forward,100,percent);
   // ThirdStage.spin(forward, 100, percent);
   // thread colorSort = thread(ColorSortBottomParallel);
   // thread colorSortTop = thread(ColorSortTopParallel);
 
   // might cause race condition
   // thread intakeSpin = thread(IntakeParallel);
-  FirstStage.spin(fwd,12000,voltageUnits::mV);
-  SecondStage.spin(fwd, 12000, voltageUnits::mV);
+  // FirstStage.spin(fwd,12000,voltageUnits::mV);
+  // SecondStage.spin(fwd, 12000, voltageUnits::mV);
     // SecondStage.spin(fwd,12000,voltageUnits::mV);
   // if(firstAutoFlag)
   //   auto_Isolation();
   // else 
   //   auto_Interaction();
 
-  firstAutoFlag = false;
+  // firstAutoFlag = false;
 }
 
 void usercontrol(void) {
@@ -224,16 +239,25 @@ void usercontrol(void) {
   }
 }
 
+
+void pid_tuning_mode(void) {
+  pid_drive_test();
+  pid_tune_task();
+}
 //
 // Main will set up the competition functions and callbacks.
 //
 int main() {
+  // Run the pre-autonomous function.
+  pre_auton();
+
+  // auto_Isolation();
+
   // Set up callbacks for autonomous and driver control periods.
+  // Competition.autonomous(autonomousMain);
   Competition.autonomous(autonomousMain);
   Competition.drivercontrol(usercontrol);
 
-  // Run the pre-autonomous function.
-  pre_auton();
 
   // Prevent main from exiting with an infinite loop.
   while (true) {

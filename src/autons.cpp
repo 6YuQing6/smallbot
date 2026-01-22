@@ -1,4 +1,19 @@
 #include "vex.h"
+
+// PID Tuning variables
+struct PIDTuneValues {
+  double drive_kP = 1.5;
+  double drive_kI = 0;
+  double drive_kD = 10;
+  double turn_kP = 0.4;
+  double turn_kI = 0.03;
+  double turn_kD = 3;
+};
+
+PIDTuneValues pidTune;
+int tuneIndex = 0; // 0=drive_kP, 1=drive_kI, 2=drive_kD, 3=turn_kP, 4=turn_kI, 5=turn_kD
+double tuneIncrement = 0.1;
+
 /**
  * Resets the constants for auton movement.
  * Modify these to change the default behavior of functions like
@@ -7,7 +22,7 @@
  * exit conditions, check the docs.
  */
 
-void default_constants(){
+void default_constants() {
   // Each constant set is in the form of (maxVoltage, kP, kI, kD, startI).
   chassis.set_drive_constants(10, 1.5, 0, 10, 0);
   chassis.set_heading_constants(6, .4, 0, 1, 0);
@@ -127,4 +142,152 @@ void holonomic_odom_test(){
   chassis.holonomic_drive_to_pose(18, 0, 180);
   chassis.holonomic_drive_to_pose(0, 18, 270);
   chassis.holonomic_drive_to_pose(0, 0, 0);
+}
+
+/**
+ * PID Tuning Function
+ * Use controller buttons:
+ * - Button UP: Increase current PID value
+ * - Button DOWN: Decrease current PID value
+ * - Button RIGHT: Next PID parameter
+ * - Button LEFT: Previous PID parameter
+ * - Button B: Increase increment step
+ * - Button A: Decrease increment step
+ * - Button X: Apply changes to chassis
+ * - Button Y: Print current values to console
+ */
+
+void pid_tune_task() {
+  bool upPressed = false;
+  bool downPressed = false;
+  bool leftPressed = false;
+  bool rightPressed = false;
+  bool aPressed = false;
+  bool bPressed = false;
+  bool xPressed = false;
+  bool yPressed = false;
+  
+  const char* paramName[] = {"Drive kP", "Drive kI", "Drive kD", "Turn kP", "Turn kI", "Turn kD"};
+  
+  while(true) {
+    Brain.Screen.clearScreen();
+    
+    // Display title
+    Brain.Screen.printAt(5, 10, "=== PID TUNING ===");
+    Brain.Screen.printAt(5, 30, "Parameter: %s", (int)paramName[tuneIndex]);
+    Brain.Screen.printAt(5, 50, "Increment: %.3f", tuneIncrement);
+    
+    // Display current values
+    Brain.Screen.printAt(5, 80, "Drive PID: kP=%.3f kI=%.3f kD=%.3f", 
+                        pidTune.drive_kP, pidTune.drive_kI, pidTune.drive_kD);
+    Brain.Screen.printAt(5, 100, "Turn PID:  kP=%.3f kI=%.3f kD=%.3f", 
+                        pidTune.turn_kP, pidTune.turn_kI, pidTune.turn_kD);
+    
+    // Display instructions
+    Brain.Screen.printAt(5, 130, "UP/DOWN: Adjust | L/R: Switch Param");
+    Brain.Screen.printAt(5, 150, "A/B: Change Step | X: Apply | Y: Print");
+    
+    // Button UP - Increase value
+    if(Controller1.ButtonUp.pressing() && !upPressed) {
+      upPressed = true;
+      switch(tuneIndex) {
+        case 0: pidTune.drive_kP += tuneIncrement; break;
+        case 1: pidTune.drive_kI += tuneIncrement; break;
+        case 2: pidTune.drive_kD += tuneIncrement; break;
+        case 3: pidTune.turn_kP += tuneIncrement; break;
+        case 4: pidTune.turn_kI += tuneIncrement; break;
+        case 5: pidTune.turn_kD += tuneIncrement; break;
+      }
+    } else if(!Controller1.ButtonUp.pressing()) {
+      upPressed = false;
+    }
+    
+    // Button DOWN - Decrease value
+    if(Controller1.ButtonDown.pressing() && !downPressed) {
+      downPressed = true;
+      switch(tuneIndex) {
+        case 0: pidTune.drive_kP -= tuneIncrement; break;
+        case 1: pidTune.drive_kI -= tuneIncrement; break;
+        case 2: pidTune.drive_kD -= tuneIncrement; break;
+        case 3: pidTune.turn_kP -= tuneIncrement; break;
+        case 4: pidTune.turn_kI -= tuneIncrement; break;
+        case 5: pidTune.turn_kD -= tuneIncrement; break;
+      }
+    } else if(!Controller1.ButtonDown.pressing()) {
+      downPressed = false;
+    }
+    
+    // Button RIGHT - Next parameter
+    if(Controller1.ButtonRight.pressing() && !rightPressed) {
+      rightPressed = true;
+      tuneIndex = (tuneIndex + 1) % 6;
+    } else if(!Controller1.ButtonRight.pressing()) {
+      rightPressed = false;
+    }
+    
+    // Button LEFT - Previous parameter
+    if(Controller1.ButtonLeft.pressing() && !leftPressed) {
+      leftPressed = true;
+      tuneIndex = (tuneIndex - 1 + 6) % 6;
+    } else if(!Controller1.ButtonLeft.pressing()) {
+      leftPressed = false;
+    }
+    
+    // Button B - Increase increment
+    if(Controller1.ButtonB.pressing() && !bPressed) {
+      bPressed = true;
+      tuneIncrement *= 2;
+      if(tuneIncrement > 10) tuneIncrement = 10;
+    } else if(!Controller1.ButtonB.pressing()) {
+      bPressed = false;
+    }
+    
+    // Button A - Decrease increment
+    if(Controller1.ButtonA.pressing() && !aPressed) {
+      aPressed = true;
+      tuneIncrement /= 2;
+      if(tuneIncrement < 0.001) tuneIncrement = 0.001;
+    } else if(!Controller1.ButtonA.pressing()) {
+      aPressed = false;
+    }
+    
+    // Button X - Apply changes to chassis
+    if(Controller1.ButtonX.pressing() && !xPressed) {
+      xPressed = true;
+      chassis.set_drive_constants(10, pidTune.drive_kP, pidTune.drive_kI, pidTune.drive_kD, 0);
+      chassis.set_turn_constants(12, pidTune.turn_kP, pidTune.turn_kI, pidTune.turn_kD, 15);
+      Brain.Screen.printAt(5, 170, ">> Changes Applied! <<");
+    } else if(!Controller1.ButtonX.pressing()) {
+      xPressed = false;
+    }
+    
+    // Button Y - Print values
+    if(Controller1.ButtonY.pressing() && !yPressed) {
+      yPressed = true;
+      Brain.Screen.printAt(5, 170, "Values printed to console");
+      printf("Current PID Values:\n");
+      printf("Drive: kP=%.3f, kI=%.3f, kD=%.3f\n", pidTune.drive_kP, pidTune.drive_kI, pidTune.drive_kD);
+      printf("Turn:  kP=%.3f, kI=%.3f, kD=%.3f\n", pidTune.turn_kP, pidTune.turn_kI, pidTune.turn_kD);
+    } else if(!Controller1.ButtonY.pressing()) {
+      yPressed = false;
+    }
+    
+    wait(20, msec);
+  }
+}
+
+/**
+ * Simple PID drive test for tuning
+ * Drive forward 24 inches and measure overshoot/settling time
+ */
+void pid_drive_test() {
+  chassis.drive_distance(24);
+}
+
+/**
+ * Simple PID turn test for tuning
+ * Turn 90 degrees and measure accuracy
+ */
+void pid_turn_test() {
+  chassis.turn_to_angle(90);
 }

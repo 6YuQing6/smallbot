@@ -8,6 +8,9 @@ using code = vision::code;
 // A global instance of brain used for printing to the V5 Brain screen.
 brain  Brain;
 
+//Controller
+controller Controller1;
+
 //Motors for the drivetrain
 
 motor Right1 = motor(PORT20, ratio6_1, false);
@@ -24,18 +27,19 @@ motor SecondStage = motor(PORT11, ratio6_1, false); // forward outake / up
 motor ThirdStage = motor(PORT12, ratio6_1, false); // forward outake / up
 
 //Pneumatics
-digital_out Matchloader = digital_out(Brain.ThreeWirePort.B);
-digital_out ColorSort = digital_out(Brain.ThreeWirePort.A);
+digital_out Matchloader = digital_out(Brain.ThreeWirePort.A);
+digital_out ColorSort = digital_out(Brain.ThreeWirePort.B);
 digital_out Expansion = digital_out(Brain.ThreeWirePort.C);
 
 //Sensors
 optical OpticalTop = optical(PORT4);
 optical OpticalBottom = optical(PORT1);
 
-// AI 
-gps GPSLeft = gps(PORT9, 0, -165, distanceUnits::mm, 180);
-gps GPSRight = gps(PORT12, 0, 165, distanceUnits::mm, 180);
+// // AI 
+// gps GPSLeft = gps(PORT9, 0, -165, distanceUnits::mm, 180);
+// gps GPSRight = gps(PORT12, 0, 165, distanceUnits::mm, 180);
 
+inertial InertialSensor = inertial(PORT17);
 
 
 
